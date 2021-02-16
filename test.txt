@@ -1,0 +1,8 @@
+/home/toma_mutemi/ton/compiler/TON-Solidity-Compiler/build/solc/./solc
+
+/home/toma_mutemi/ton/compiler/TON-Solidity-Compiler/lib/stdlib_sol.tvm
+
+
+/home/toma_mutemi/ton/linker/TVM-linker/tvm_linker/target/debug/./tvm_linker
+
+/home/toma_mutemi/ton/tonos-cli/./tonos-cli
