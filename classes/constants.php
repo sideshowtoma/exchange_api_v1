@@ -27,6 +27,11 @@ define("database_user_name","ton");
 define("database_host","localhost");
 
 define("users_table","users");
+define("user_accounts","user_accounts");
+define("bank","bank");
+define("bank_sponsors","bank_sponsors");
+
+
 
 define("absolute_path","/var/www/html/exchange_api_v1");
 
@@ -41,6 +46,7 @@ define("ton_cli_command","/home/toma_mutemi/ton/tonos-cli/./tonos-cli");
 define("compiler_command_path","/home/toma_mutemi/ton/compiler/TON-Solidity-Compiler/build/solc/");
 define("tvm_linker_command_path","/home/toma_mutemi/ton/linker/TVM-linker/tvm_linker/target/debug/");
 define("ton_cli_command_path","/home/toma_mutemi/ton/tonos-cli/");
+define("default_work_chain_id",0);
 
 
 define("user_login_url","#");

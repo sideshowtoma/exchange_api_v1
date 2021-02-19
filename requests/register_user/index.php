@@ -74,8 +74,11 @@ if(
                                                     {
                                                         //compile contract, and make wallet
                                                          $creat_wallet=make_wallet_for_me($get_data["_id"]);
-
-                                                        if($creat_wallet['status']==true)
+                                                         
+                                                         //add wallet info
+                                                         $creat_account=InsertIntoUserAccountsTable(user_accounts,$get_data["_id"],$creat_wallet['data']['raw_address'], base64_encode($creat_wallet['data']['seed_phrase']), storable_datetime_function(time()));
+                                                         
+                                                        if($creat_wallet['status']==true && $creat_account==true)
                                                         {
                                                             $body=make_user_invite_email_html($get_data["name"],'Client',$get_data["email_address"],$password,$creat_wallet['data']['seed_phrase'],$creat_wallet['data']['raw_address']);
                                                             mail_sender_function($get_data["email_address"], $get_data["name"], $body, 'Please do not reply to this email', 'Flamingo finance account');

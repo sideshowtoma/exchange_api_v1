@@ -6,6 +6,62 @@ header('Content-Type: application/json');
  * and open the template in the editor.
  */
 
+function make_session_key($user_info)
+{
+    if($user_info['session_key']!=null)
+    {
+        return $user_info['session_key'];
+    }
+    else
+    {
+          $key= sha1($user_info['_id'].'--'.$user_info['email_address'].$user_info['type'].$user_info['id_or_passport'].$user_info['id_passport_number'].$user_info['time_stamp'].$user_info['password']);
+          $key= base64_encode($key.md5($key).sha1($key));
+  
+          UpdateTableOneCondition(users_table, 'session_key', $key, '_id', $user_info['_id']);
+          
+          return $key;
+          
+    }
+    
+    
+}
+
+function verify_session_key()
+{
+    
+    $key_bearer= explode('Bearer ',getallheaders()['Authorization']) ;
+    $key=$key_bearer[1];
+    //echo $key;
+   
+
+    $data= SelectTableOnTwoConditions(users_table, 'session_key', $key, 'session_key', $key)[0];
+    //echo json_encode($data);
+    if(count($data)>0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
+}
+
+function get_session_info()
+{
+    
+    $key_bearer= explode('Bearer ',getallheaders()['Authorization']) ;
+    $key=$key_bearer[1];
+    //echo $key;
+   
+
+    return SelectTableOnTwoConditions(users_table, 'session_key', $key, 'session_key', $key)[0];
+    
+    
+}
+
+
+
 function get_my_post_get_variables($look_for_array)
 {
     $return= array();
@@ -63,6 +119,20 @@ function validateDate($date, $format = 'Y-m-d')
     $d = DateTime::createFromFormat($format, $date);
     // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
     return $d && $d->format($format) === $date;
+}
+
+
+function UTCTimeToLocalTime($time, $tz = '', $FromDateFormat = 'Y-m-d H:i:s', $ToDateFormat = 'H:i:s d-m-Y')
+{
+if ($tz == '')
+    $tz = date_default_timezone_get();
+
+$utc_datetime = DateTime::createFromFormat($FromDateFormat, $time, new
+    DateTimeZone('UTC'));
+$local_datetime = $utc_datetime;
+
+$local_datetime->setTimeZone(new DateTimeZone($tz));
+return $local_datetime->format($ToDateFormat);
 }
 
 
@@ -379,4 +449,205 @@ function mail_sender_function($address,$name,$body,$alt_body,$subject,$attachmen
           //echo "Message sent!";
             return true;
         }
+}
+
+
+function get_account_balance($raw_account_id)
+{
+    $data=array();
+    if(ensure_ton_url())
+    {
+         $account_result=run_ssh_command(ton_cli_command." account ".$raw_account_id);  
+               
+        // die($account_result["Output"]);
+         
+                                    if(isset($account_result["Output"]))
+                                    {
+                                       // echo read_specific_line($account_result["Output"],8);
+                                        //echo $deploy_result["Output"];
+                                          $balance= explode("balance:",read_specific_line($account_result["Output"],7))[1];
+                                          $last_paid=explode("last_paid:",read_specific_line($account_result["Output"],8))[1];
+                                          $last_trans_lt=explode("last_trans_lt:",read_specific_line($account_result["Output"],9))[1];
+                                          
+                                          if(isset($balance) && isset($last_paid) && isset($last_trans_lt) )
+                                          {
+                                               $data['balance']=(double)trim($balance)/1000000000;
+                                          $data['last_paid']= storable_datetime_function(trim($last_paid));
+                                          $data['last_trans_lt']=trim($last_trans_lt);
+                                         // $data['last_trans_real_time']=$last_trans_lt;
+                                          }
+                                          else
+                                          {
+                                              $data['balance']=0;
+                                              $data['last_paid']=NULL;
+                                              $data['last_trans_lt']=NULL;
+                                                      
+                                          }
+                                         
+                                          
+                                         // echo $keys.' '.$seed_phrase.' '.$raw_address;
+                                          
+                                    }
+    }
+    
+    return $data;
+}
+
+
+function get_seed_phrase()
+{
+    $seed_phrase=null;
+   // die("hahaha");
+    if(ensure_ton_url())
+    {
+         $phrase_result=run_ssh_command(ton_cli_command." genphrase");  
+               
+         //die($phrase_result["Output"]);
+         
+                                    if(isset($phrase_result["Output"]))
+                                    {
+                                       
+                                          $seed_phrase= explode("Seed phrase: ",read_specific_line($phrase_result["Output"],2))[1];
+                                          
+                                         $seed_phrase= str_replace('"', "", $seed_phrase);
+                                          
+                                    }
+    }
+    
+    return $seed_phrase;
+}
+
+
+function get_a_key_pair($key_pair_name,$seed_phrase)
+{
+    $made=false;
+    
+   // die("hahaha");
+    if(ensure_ton_url())
+    {
+       // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
+         $key_pair_result=run_ssh_command(ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"');  
+               
+         //die($key_pair_result["Output"]);
+         
+                                    if(isset($key_pair_result["Output"]))
+                                    {
+                                       
+                                          $key_pair_path= explode("key_file: ",read_specific_line($key_pair_result["Output"],2))[1];
+                                          
+                                          if(file_exists($key_pair_path))
+                                          {
+                                              $made=true;
+                                          }
+                                              
+                                        
+                                          
+                                    }
+    }
+    
+    return $made;
+}
+
+
+function make_address_multi_sig($key_pair_path,$tvc,$abi)
+{
+    $raw_address=false;
+    
+   // die("hahaha");
+    if(ensure_ton_url())
+    {
+       // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
+         $make_address_result=run_ssh_command(ton_cli_command." genaddr ".$tvc." ".$abi." --setkey ".$key_pair_path." --wc ".default_work_chain_id);  
+               
+        // die($make_address_result["Output"]);
+         
+                                    if(isset($make_address_result["Output"]))
+                                    {
+                                       
+                                          $raw_address= explode("Raw address: ",read_specific_line($make_address_result["Output"],8))[1];
+                                          
+                                         
+                                              
+                                        
+                                          
+                                    }
+    }
+    
+    return $raw_address;
+}
+
+
+function send_some_tokens_multisig($from_raw_address,$to_raw_address,$from_key_file,$abi,$amount)
+{
+    $sent=false;
+    
+   // die("hahaha");
+    if(ensure_ton_url())
+    {
+        $array=array("dest"=>$to_raw_address,
+                    "value"=>$amount,
+                    "bounce"=>false,
+                    "allBalance"=>false,
+                    "payload"=>'',
+                    
+            
+        );
+        $command= ton_cli_command." call ".$from_raw_address." submitTransaction ".json_encode(json_encode($array))." --abi ".$abi." --sign ".$from_key_file;
+        
+        die($command);
+       // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
+         $make_transaction=run_ssh_command($command);  
+               
+         die($make_transaction["Output"]);
+         
+                                    if(isset($make_address_result["Output"]))
+                                    {
+                                       
+                                          $raw_address= explode("Raw address: ",read_specific_line($make_address_result["Output"],8))[1];
+                                          
+                                         
+                                              
+                                        
+                                          
+                                    }
+    }
+    
+    return $sent;
+}
+
+
+function deploy_my_multisig($tvc,$owners,$req,$abi,$signjson)
+{
+    $sent=false;
+    
+   // die("hahaha");
+    if(ensure_ton_url())
+    {
+        $array=array("owners"=>$owners,
+                    "reqConfirms"=>$req,
+                    
+            
+        );
+        
+        $command= ton_cli_command." deploy ".$tvc." ".json_encode(json_encode($array))." --abi ".$abi." --sign ".$signjson;
+        
+        die($command);
+       // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
+         $make_transaction=run_ssh_command($command);  
+               
+         die($make_transaction["Output"]);
+         
+                                    if(isset($make_address_result["Output"]))
+                                    {
+                                       
+                                          $raw_address= explode("Raw address: ",read_specific_line($make_address_result["Output"],8))[1];
+                                          
+                                         
+                                              
+                                        
+                                          
+                                    }
+    }
+    
+    return $sent;
 }
