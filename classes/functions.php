@@ -264,6 +264,22 @@ function read_specific_line($string,$number)
 }
 
 
+
+function see_if_target_string_exists($string,$target_string_line)
+{
+    $exists=false;
+    
+        foreach(preg_split("/((\r?\n)|(\r\n?))/",  $string) as $line)
+        {
+           if(trim(strtolower($line)) == trim(strtolower($target_string_line)) )
+           {
+               $exists=true;
+           }
+        } 
+        
+        return $exists;
+}
+
 function make_wallet_for_me($user_id)
 {
     $array_return=array();
@@ -494,6 +510,34 @@ function get_account_balance($raw_account_id)
 }
 
 
+function deploy_wallet_contract($wallet_abi,$key_pair_path,$wallet_tvc)
+{
+    $done=false;
+    if(ensure_ton_url())
+    {
+         $deploy=run_ssh_command(ton_cli_command." deploy --abi ".$wallet_abi." --sign ".$key_pair_path." ".$wallet_tvc." {} ");  
+               
+         //die($deploy["Output"]);
+         
+                                    if(isset($deploy["Output"]))
+                                    {
+                                       // echo read_specific_line($account_result["Output"],8);
+                                        //echo $deploy_result["Output"];
+                                          $status= read_specific_line($deploy["Output"],9);
+                                            //die($status); 
+                                          if($status=="Transaction succeeded.")
+                                          {
+                                          $done=true;
+                                          }
+                                          
+                                    }
+    }
+    
+    return $done;
+}
+
+
+
 function get_seed_phrase()
 {
     $seed_phrase=null;
@@ -584,6 +628,7 @@ function send_some_tokens_multisig($from_raw_address,$to_raw_address,$from_key_f
    // die("hahaha");
     if(ensure_ton_url())
     {
+        /*
         $array=array("dest"=>$to_raw_address,
                     "value"=>$amount,
                     "bounce"=>false,
@@ -592,21 +637,38 @@ function send_some_tokens_multisig($from_raw_address,$to_raw_address,$from_key_f
                     
             
         );
-        $command= ton_cli_command." call ".$from_raw_address." submitTransaction ".json_encode(json_encode($array))." --abi ".$abi." --sign ".$from_key_file;
+        */
+      
+         $array=array("dest"=>$to_raw_address,
+                    "value"=>$amount,
+                    "bounce"=>false
+                    
+            
+        );
+      
+       
+        $command= ton_cli_command." call ".$from_raw_address." sendTransaction ".json_encode(json_encode($array))." --abi ".$abi." --sign ".$from_key_file;
         
-        die($command);
+       //echo die($command);
        // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
          $make_transaction=run_ssh_command($command);  
                
-         die($make_transaction["Output"]);
+         //echo($make_transaction["Output"]);
          
-                                    if(isset($make_address_result["Output"]))
+                                    if(isset($make_transaction["Output"]))
                                     {
                                        
-                                          $raw_address= explode("Raw address: ",read_specific_line($make_address_result["Output"],8))[1];
+                                        $sent=see_if_target_string_exists($make_transaction["Output"],"Succeeded.");
+                                           
+                                        /*
+                                          $status= read_specific_line($make_transaction["Output"],15);
                                           
-                                         
-                                              
+                                          //echo $status.':::::::';
+                                         if($status=="Succeeded.")
+                                         {
+                                             $sent=true;
+                                         }
+                                          */    
                                         
                                           
                                     }
@@ -618,7 +680,7 @@ function send_some_tokens_multisig($from_raw_address,$to_raw_address,$from_key_f
 
 function deploy_my_multisig($tvc,$owners,$req,$abi,$signjson)
 {
-    $sent=false;
+    $deployed=false;
     
    // die("hahaha");
     if(ensure_ton_url())
@@ -631,23 +693,22 @@ function deploy_my_multisig($tvc,$owners,$req,$abi,$signjson)
         
         $command= ton_cli_command." deploy ".$tvc." ".json_encode(json_encode($array))." --abi ".$abi." --sign ".$signjson;
         
-        die($command);
+        //die($command);
        // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
-         $make_transaction=run_ssh_command($command);  
+         $deploy_results=run_ssh_command($command);  
                
-         die($make_transaction["Output"]);
+        // die($make_transaction["Output"]);
          
-                                    if(isset($make_address_result["Output"]))
+                                    if(isset($deploy_results["Output"]))
                                     {
+                                            $deployed=see_if_target_string_exists($deploy_results["Output"],"Transaction succeeded.");
                                        
-                                          $raw_address= explode("Raw address: ",read_specific_line($make_address_result["Output"],8))[1];
                                           
-                                         
                                               
                                         
                                           
                                     }
     }
     
-    return $sent;
+    return $deployed;
 }
