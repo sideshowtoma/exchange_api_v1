@@ -712,3 +712,67 @@ function deploy_my_multisig($tvc,$owners,$req,$abi,$signjson)
     
     return $deployed;
 }
+
+function get_rates_to_exchange_ton()
+{
+    
+
+    $array=array();
+    $array_to_bounce=array('url'=>coinmarketingurl."coin/".coinmarketingurl_ton_code,
+                    'myvars'=>'',
+                    'header_array'=>array(' '.coinmarketingurl_header.':'.coinmarketingurl_token.' '),
+                    'post'=>0
+                );
+    
+    $coin=json_decode(send_curl_post(bounce_traffic_url, json_encode($array_to_bounce), array(),true),true);
+   
+    if($coin["status"]=="success")
+    {
+        $bank=json_decode(send_curl_post(apilayerurl."?access_key=".apilayer_access_key."&currencies=".apilayer_access_currencies."&format=2", "", array(),false),true);
+         
+        if($bank["success"]==true)
+        {
+            //echo json_encode($bank);
+            $array=$coin["data"]["coin"];
+           // $array["quotes"]=$bank["quotes"];
+            unset($array["btcPrice"]);
+            $array["price_kes"]=($array["price"]*$bank["quotes"]["USDKES"]);
+             $array["price_kes_actual"]=($array["price"]*$bank["quotes"]["USDKES"])-($array["price"]*$bank["quotes"]["USDKES"])*(percentage_offset/100);
+             $array["price_kes_flamingo_cut_price"]=($array["price"]*$bank["quotes"]["USDKES"])*(percentage_offset/100);
+             $array["price_kes_flamingo_cut_percentage"]=percentage_offset;
+             //$array["price_kes_flamingo_usd_kes_rate"]=$bank["quotes"]["USDKES"];
+             $array["price_kes_flamingo_kes_usd_rate"]=$bank["quotes"]["USDKES"];
+             $array["price_kes_flamingo_all_quotes"]=$bank["quotes"];
+        }
+        
+    }
+    
+     
+    
+    return $array;
+}
+
+function send_curl_post($url,$myvars,$header_array,$post=1)
+{
+   
+     $ch = curl_init( $url );//initialize response
+            
+    //die($myvars);
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);//ignore sign in
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false);//ignore sign in
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $myvars);//set fields
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $header_array); 
+        
+            
+            curl_setopt( $ch, CURLOPT_POST, $post);//as post
+        
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1 );//true to url
+        curl_setopt( $ch, CURLOPT_HEADER, 0 );//header null
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);//catch the response
+        
+        
+       
+        return curl_exec($ch);
+    
+}
+ 
