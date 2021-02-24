@@ -30,6 +30,7 @@ define("users_table","users");
 define("user_accounts","user_accounts");
 define("bank","bank");
 define("bank_sponsors","bank_sponsors");
+define("users_transactions","users_transactions");
 
 
 
@@ -70,3 +71,5 @@ define("apilayer_access_format",2);
 define("bounce_traffic_url","http://35.195.115.148/apiV2/requests/others/run_curl_for_me/index.php");
 
 define("percentage_offset",12);
+
+define("max_transact",1000);

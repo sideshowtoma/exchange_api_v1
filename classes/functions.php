@@ -776,3 +776,70 @@ function send_curl_post($url,$myvars,$header_array,$post=1)
     
 }
  
+
+function do_multisig_transfare($multisig_address,$destination_address,$value,$multisig_abi,$custodian_key_file)
+{
+    $transaction_id=null;
+    
+    if(ensure_ton_url())
+    {
+         //decide on bounce
+            $member_account_balance_data=get_account_balance($destination_address);
+            $bounce=true;//assume contract exists
+            if($member_account_balance_data['balance']==0)
+            {
+               $bounce=false;//contract does not exist
+            }
+
+                                              // die(json_encode($member_account_balance_data));
+
+           $array=array("dest"=>$destination_address,
+                           "value"=>(int)($value*1000000000),
+                           "bounce"=>$bounce,
+                           "allBalance"=>false,
+                           "payload"=>""
+                       );
+
+              $command= ton_cli_command." call ".$multisig_address." submitTransaction ".json_encode(json_encode($array))." --abi ".$multisig_abi." --sign ".$custodian_key_file;
+
+            die($command);
+            //
+              $deploy_results=run_ssh_command($command);  
+
+             die($deploy_results["Output"]);
+               if(isset($deploy_results["Output"]))
+               {
+
+                                                 $transaction_id= explode('"transId": ',read_specific_line($deploy_results["Output"],17))[1];
+                                           $transaction_id= str_replace('"', "", $transaction_id);      
+                }
+     }
+    
+     return $transaction_id;
+}
+
+
+function confirm_transaction_multisig($multisig_address,$transaction_id,$multisig_abi,$custodian_key_file)
+{
+    $done=false;
+    
+     if(ensure_ton_url())
+    {
+         $array=array("transactionId"=>$transaction_id );
+    
+        $command= ton_cli_command." call ".$multisig_address." confirmTransaction ".json_encode(json_encode($array))." --abi ".$multisig_abi." --sign ".$custodian_key_file;
+
+        //die($command);
+        $deploy_results=run_ssh_command($command);  
+
+           die($deploy_results["Output"]."==");
+            if(isset($deploy_results["Output"]))
+            {
+
+
+            }
+     }
+     
+    
+    return $done;
+}
