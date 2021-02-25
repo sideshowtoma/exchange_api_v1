@@ -649,7 +649,7 @@ function send_some_tokens_multisig($from_raw_address,$to_raw_address,$from_key_f
        
         $command= ton_cli_command." call ".$from_raw_address." sendTransaction ".json_encode(json_encode($array))." --abi ".$abi." --sign ".$from_key_file;
         
-       //echo die($command);
+       // die($command);
        // echo ton_cli_command." getkeypair ".$key_pair_name.' "'.$seed_phrase.'"';
          $make_transaction=run_ssh_command($command);  
                
@@ -724,8 +724,11 @@ function get_rates_to_exchange_ton()
                     'post'=>0
                 );
     
+    
     $coin=json_decode(send_curl_post(bounce_traffic_url, json_encode($array_to_bounce), array(),true),true);
    
+    //die(json_encode($coin));
+    
     if($coin["status"]=="success")
     {
         $bank=json_decode(send_curl_post(apilayerurl."?access_key=".apilayer_access_key."&currencies=".apilayer_access_currencies."&format=2", "", array(),false),true);
@@ -784,6 +787,7 @@ function do_multisig_transfare($multisig_address,$destination_address,$value,$mu
     if(ensure_ton_url())
     {
          //decide on bounce
+        /*
             $member_account_balance_data=get_account_balance($destination_address);
             $bounce=true;//assume contract exists
             if($member_account_balance_data['balance']==0)
@@ -791,6 +795,8 @@ function do_multisig_transfare($multisig_address,$destination_address,$value,$mu
                $bounce=false;//contract does not exist
             }
 
+            */
+            $bounce=false;
                                               // die(json_encode($member_account_balance_data));
 
            $array=array("dest"=>$destination_address,
@@ -800,18 +806,18 @@ function do_multisig_transfare($multisig_address,$destination_address,$value,$mu
                            "payload"=>""
                        );
 
-              $command= ton_cli_command." call ".$multisig_address." submitTransaction ".json_encode(json_encode($array))." --abi ".$multisig_abi." --sign ".$custodian_key_file;
+              $command= ton_cli_command." call ".'"'.$multisig_address.'"'." submitTransaction ".json_encode(json_encode($array))." --abi ".$multisig_abi." --sign ".$custodian_key_file;
 
-            die($command);
+         //   die($command);
             //
               $deploy_results=run_ssh_command($command);  
 
-             die($deploy_results["Output"]);
+            // echo($deploy_results["Output"]).'****************';
                if(isset($deploy_results["Output"]))
                {
 
-                                                 $transaction_id= explode('"transId": ',read_specific_line($deploy_results["Output"],17))[1];
-                                           $transaction_id= str_replace('"', "", $transaction_id);      
+                    $transaction_id= explode('"transId": ',read_specific_line($deploy_results["Output"],17))[1];
+                    $transaction_id= str_replace('"', "", $transaction_id);      
                 }
      }
     
@@ -832,11 +838,13 @@ function confirm_transaction_multisig($multisig_address,$transaction_id,$multisi
         //die($command);
         $deploy_results=run_ssh_command($command);  
 
-           die($deploy_results["Output"]."==");
+        //   echo($deploy_results["Output"]).'======================';
             if(isset($deploy_results["Output"]))
             {
 
-
+                
+                $done=see_if_target_string_exists( $deploy_results["Output"],"Succeeded.");
+                 
             }
      }
      

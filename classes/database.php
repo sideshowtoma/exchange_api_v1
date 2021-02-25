@@ -472,3 +472,75 @@ function InsertIntoBankSponsorsNullTable($TableName,$bank_id,$user_id,$is_sponso
 
 
 }
+
+
+
+function InsertIntoTransactionsTable($TableName,$user_id,$bank_id,$buying,$amount,$exchange_rate,$pin_id,$mode,$narrative,$comments,$time_stamp)
+{
+    
+        //connecting to database
+        $Connection=ConnetToDatabaseFuntion();
+        
+        
+        $insert_into_table ="INSERT INTO `$TableName`(`user_id`,
+                                                        `bank_id`,
+                                                        `buying`,
+                                                        `amount`,
+                                                        `exchange_rate`,
+                                                        `pin_id`,
+                                                        `mode`,
+                                                        `narrative`,
+                                                        `comments`,
+                                                        `time_stamp`) 
+                                          VALUES ('". mysqli_escape_string($Connection, $user_id)."',
+                                                   '". mysqli_escape_string($Connection, $bank_id)."',
+                                                   '". mysqli_escape_string($Connection, $buying)."',
+                                                   '". mysqli_escape_string($Connection, $amount)."',
+                                                   '". mysqli_escape_string($Connection, $exchange_rate)."',
+                                                   '". mysqli_escape_string($Connection, $pin_id)."',
+                                                   '". mysqli_escape_string($Connection, $mode)."',
+                                                   '". mysqli_escape_string($Connection, $narrative)."',
+                                                   '". mysqli_escape_string($Connection, $comments)."',
+                                                   '". mysqli_escape_string($Connection, $time_stamp)."')";
+//die($insert_into_table);
+        //echo $insert_into_table.'<br><br><br><br>';
+        
+                                if($insert_into_table_query=mysqli_query($Connection,$insert_into_table))
+                                {
+                                        mysqli_free_result($insert_into_table_query);
+                                        $Connection->close();
+                                        return true;
+                                }
+                                else 
+                                {
+                                    die("could not insert into users_transactions table".$insert_into_table);
+                                }
+
+
+}
+
+
+function GetTableNumRowsWithCondition($TableName,$column1,$value1,$column2,$value2)
+{
+        
+        //connecting to database
+        $Connection=ConnetToDatabaseFuntion();
+
+        $query="SELECT * FROM `$TableName` WHERE `".$column1."` = '".$value1."' AND  `".$column2."` = '".$value2."'";
+
+        $do_query=mysqli_query($Connection,$query);
+
+        if($do_query)
+        {
+                $num= mysqli_num_rows($do_query); 
+                mysqli_free_result($do_query);
+                $Connection->close();
+                return $num;
+        }
+        else 
+        {
+                
+                return 0;
+        }
+
+}
