@@ -544,3 +544,44 @@ function GetTableNumRowsWithCondition($TableName,$column1,$value1,$column2,$valu
         }
 
 }
+
+
+function InsertIntoTransactionsTempTable($TableName,$user_id,$bank_id,$amount,$pin_id,$mode,$comments,$authorization,$time_stamp)
+{
+    
+        //connecting to database
+        $Connection=ConnetToDatabaseFuntion();
+        
+        
+        $insert_into_table ="INSERT INTO `$TableName`(`user_id`,
+                                                        `bank_id`,
+                                                        `amount`,
+                                                        `pin_id`,
+                                                        `mode`,
+                                                        `comments`,
+                                                        `authorization`,
+                                                        `time_stamp`) 
+                                          VALUES ('". mysqli_escape_string($Connection, $user_id)."',
+                                                   '". mysqli_escape_string($Connection, $bank_id)."',
+                                                   '". mysqli_escape_string($Connection, $amount)."',
+                                                   '". mysqli_escape_string($Connection, $pin_id)."',
+                                                   '". mysqli_escape_string($Connection, $mode)."',
+                                                   '". mysqli_escape_string($Connection, $comments)."',
+                                                   '". mysqli_escape_string($Connection, $authorization)."',
+                                                   '". mysqli_escape_string($Connection, $time_stamp)."')";
+//die($insert_into_table);
+        //echo $insert_into_table.'<br><br><br><br>';
+        
+                                if($insert_into_table_query=mysqli_query($Connection,$insert_into_table))
+                                {
+                                        mysqli_free_result($insert_into_table_query);
+                                        $Connection->close();
+                                        return true;
+                                }
+                                else 
+                                {
+                                    die("could not insert into users_transactions_temp table".$insert_into_table);
+                                }
+
+
+}

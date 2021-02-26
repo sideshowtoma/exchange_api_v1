@@ -31,10 +31,12 @@ define("user_accounts","user_accounts");
 define("bank","bank");
 define("bank_sponsors","bank_sponsors");
 define("users_transactions","users_transactions");
+define("users_transactions_temp","users_transactions_temp");
 
 
 
 define("absolute_path","/var/www/html/exchange_api_v1");
+define("local_url","http://127.0.0.1/exchange_api_v1");
 
 
 define("ton_url","https://net.ton.dev"); //https://net.ton.dev or https://main.ton.dev 
