@@ -731,8 +731,10 @@ function get_rates_to_exchange_ton()
     
     if($coin["status"]=="success")
     {
-        $bank=json_decode(send_curl_post(apilayerurl."?access_key=".apilayer_access_key."&currencies=".apilayer_access_currencies."&format=2", "", array(),false),true);
+        $bank=get_the_rates_for_me_cached();
          
+       // echo json_encode($bank);
+        
         if($bank["success"]==true)
         {
             //echo json_encode($bank);
@@ -754,6 +756,37 @@ function get_rates_to_exchange_ton()
     
     return $array;
 }
+
+
+function get_the_rates_for_me_cached()
+{
+    $bank=array();
+    
+    //check if it exists
+      $data= SelectFromTableOnPreparedQuery("SELECT * FROM `".currency_temp."`  WHERE   ".currency_temp.".url_hash ='".md5(apilayerurl)."' AND  ".currency_temp.".time_stamp >= '".storable_datetime_function(time())."' ")[0];
+      
+      if(empty($data))
+      {
+          
+           $bank=json_decode(send_curl_post(apilayerurl."?access_key=".apilayer_access_key."&currencies=".apilayer_access_currencies."&format=2", "", array(),false),true);
+           //check if exists
+           if(CheckIfExistsTwoColumnsFunction(currency_temp, 'url_hash', 'url_hash', md5(apilayerurl), md5(apilayerurl)))//does not exist insert
+           {
+               InsertIntoCurrencyTemp(currency_temp,md5(apilayerurl) ,json_encode($bank), storable_datetime_function(time()+max_cache_time));
+           }
+           else//update
+           {
+               UpdateTableOneCondition(currency_temp, 'response', json_encode($bank), 'url_hash', md5(apilayerurl));
+               UpdateTableOneCondition(currency_temp, 'time_stamp', storable_datetime_function(time()+max_cache_time), 'url_hash', md5(apilayerurl));
+           }
+      }
+      else
+      {
+          $bank= json_decode($data['response'],true);
+      }
+    return $bank;
+}
+
 
 function send_curl_post($url,$myvars,$header_array,$post=1)
 {

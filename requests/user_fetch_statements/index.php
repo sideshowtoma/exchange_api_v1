@@ -67,7 +67,7 @@ if( isset($user_id) && !empty($user_id) &&
                                         DATE_FORMAT(".users_transactions.".time_stamp, '%d-%m-%Y %k:%i:%s') AS 'time_stamp'
                                         FROM `".users_transactions."` 
                                         INNER JOIN ".bank." ON ".bank."._id =".users_transactions.".bank_id
-                                        WHERE  ".users_transactions.".user_id = $user_id AND ".users_transactions.".buying = $buying_selling  ".$search_phrase."
+                                        WHERE  ".users_transactions.".user_id = $user_id AND ".users_transactions.".buying = '".$buying_selling."'  ".$search_phrase."
                                         ORDER BY `".users_transactions."`.`".$sort_by."` $sort_order LIMIT ".$limit." OFFSET ".$skip." ";
 
                             $query_is_all= SelectFromTableOnPreparedQuery($query_is);

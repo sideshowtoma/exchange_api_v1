@@ -32,6 +32,7 @@ define("bank","bank");
 define("bank_sponsors","bank_sponsors");
 define("users_transactions","users_transactions");
 define("users_transactions_temp","users_transactions_temp");
+define("currency_temp","currency_temp");
 
 
 
@@ -52,7 +53,7 @@ define("ton_cli_command_path","/home/toma_mutemi/ton/tonos-cli/");
 define("default_work_chain_id",0);
 
 
-define("user_login_url","#");
+define("user_login_url","https://clicksoft.co.ke/flamingo/");//http://www.flamingofinance.net/flamingo/
 define("ios_app_url","#");
 define("android_app_url","#");
 
@@ -61,11 +62,11 @@ define("android_app_url","#");
 define("coinmarketingurl","https://api.coinranking.com/v2/");
 define("coinmarketingurl_ton_code","VyoUfuqTuttT");
 define("coinmarketingurl_header","x-access-token");
-define("coinmarketingurl_token","coinranking6dfca164170a5f41b0b73ac400b9c01385d3209da6c6d6e1");
+define("max_cache_time",3600*24*1);//1 day
 
 
 define("apilayerurl","http://www.apilayer.net/api/live");
-define("apilayer_access_key","514bed42400d9200c7264bc58b74bb27");
+define("apilayer_access_key","adc9a6ce80e68ad34841ac97ba4db1c1");
 define("apilayer_access_currencies","KRW,AFA,ALL,DZD,ADP,AOK,ARS,AMD,AWG,AUD,BSD,BHD,BDT,BBD,BZD,BMD,BTN,BOB,BWP,BRL,GBP,BND,BGN,BUK,BIF,CAD,CVE,KYD,CLP,CLF,COP,XOF,XAF,KMF,XPF,CRC,CUP,CYP,CZK,DKK,YDD,DOP,XCD,TPE,ECS,EGP,SVC,EEK,ETB,EUR,FKP,FJD,GMD,GHC,GIP,XAU,GTQ,GNF,GWP,GYD,HTG,HNL,HKD,HUF,INR,IDR,XDR,IRR,IQD,IEP,ILS,JMD,JPY,JOD,KHR,KES,KWD,LAK,LBP,LSL,LRD,LYD,MOP,MGF,MWK,MYR,MVR,MTL,MRO,MUR,MXP,MNT,MAD,MZM,NAD,NPR,ANG,YUD,NZD,NIO,NGN,KPW,NOK,OMR,PKR,XPD,PAB,PGK,PYG,PEN,PHP,XPT,PLN,QAR,RON,RUB,RWF,WST,STD,SAR,SCR,SLL,XAG,SGD,SKK,SBD,SOS,ZAR,LKR,SHP,SDP,SRG,SZL,SEK,CHF,SYP,TWD,TZS,THB,TOP,TTD,TND,TRY,UGX,AED,UYU,USD,VUV,VEF,VND,YER,CNY,ZRZ,ZMK,ZWD");
 
 define("apilayer_access_format",2);

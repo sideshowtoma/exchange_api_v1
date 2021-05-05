@@ -585,3 +585,34 @@ function InsertIntoTransactionsTempTable($TableName,$user_id,$bank_id,$amount,$p
 
 
 }
+
+
+function InsertIntoCurrencyTemp($TableName,$url_hash ,$response,$time_stamp)
+{
+    
+        //connecting to database
+        $Connection=ConnetToDatabaseFuntion();
+        
+        
+        $insert_into_table ="INSERT INTO `$TableName`(`url_hash`,
+                                                        `response`,
+                                                        `time_stamp`) 
+                                          VALUES ('". mysqli_escape_string($Connection, $url_hash )."',
+                                                   '". mysqli_escape_string($Connection, $response)."',
+                                                   '". mysqli_escape_string($Connection, $time_stamp)."')";
+//die($insert_into_table);
+        //echo $insert_into_table.'<br><br><br><br>';
+        
+                                if($insert_into_table_query=mysqli_query($Connection,$insert_into_table))
+                                {
+                                        mysqli_free_result($insert_into_table_query);
+                                        $Connection->close();
+                                        return true;
+                                }
+                                else 
+                                {
+                                    die("could not insert into user_accounts table".$insert_into_table);
+                                }
+
+
+}
